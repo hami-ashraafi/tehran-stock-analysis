@@ -1,7 +1,7 @@
 ---
 name: tehran-stock-analysis
 description: Use for TSE analysis or «فرصت خرید پیدا کن» screening.
-version: 2.3.0
+version: 2.4.0
 author: Hermes Agent
 license: MIT
 platforms: [windows, linux, macos]
@@ -32,6 +32,10 @@ Answer in simple Persian, usually under 150 words. Do the research internally; n
 ## Prerequisites
 Use `terminal` to discover the Python environment, package versions, current Tehran date/time and active skill path. The local `C:/tmp/tse-env/Scripts/python.exe` has previously worked with pytse-client, finpy-tse, pandas and jdatetime; check existence/imports before reuse. Prefer a uv Python 3.11 environment for older binary dependencies. Use the Hermes scratch directory for temporary data, never the system temp directory. Do not reinstall global packages unnecessarily.
 Read `references/research-and-validation.md` when changing interpretation or thresholds. This workflow is a conservative heuristic, NOT a backtested profitable system.
+
+## Market regime gate (buy_gate)
+
+New buys are only allowed when the official TSE **equal-weighted index (شاخص هموزن)** closes above its own EMA50. Use `scripts/regime_gate.py` → `market_regime()` → `buy_gate_open`. Rationale: the cap-weighted شاخص کل is dominated by a few giants; هموزن reflects the average tradeable stock. When `buy_gate_open` is false, screening may still run for watchlist purposes but every verdict must be `wait`, never بخر. The gate uses the index's own session date, not the local clock.
 
 ## Evidence-based exit policy (from variant experiments, 2026-10-10)
 
