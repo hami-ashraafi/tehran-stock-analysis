@@ -1,7 +1,7 @@
 ---
 name: tehran-stock-analysis
 description: Use for TSE analysis or «فرصت خرید پیدا کن» screening.
-version: 2.2.0
+version: 2.3.0
 author: Hermes Agent
 license: MIT
 platforms: [windows, linux, macos]
@@ -32,6 +32,18 @@ Answer in simple Persian, usually under 150 words. Do the research internally; n
 ## Prerequisites
 Use `terminal` to discover the Python environment, package versions, current Tehran date/time and active skill path. The local `C:/tmp/tse-env/Scripts/python.exe` has previously worked with pytse-client, finpy-tse, pandas and jdatetime; check existence/imports before reuse. Prefer a uv Python 3.11 environment for older binary dependencies. Use the Hermes scratch directory for temporary data, never the system temp directory. Do not reinstall global packages unnecessarily.
 Read `references/research-and-validation.md` when changing interpretation or thresholds. This workflow is a conservative heuristic, NOT a backtested profitable system.
+
+## Evidence-based exit policy (from variant experiments, 2026-10-10)
+
+Backtested on 8 liquid symbols, ~2y window, with fees/slippage. The original default (20-session cap + signal-loss exit) yielded median +4.3% vs buy&hold +79%, beating B&H on 0/8 symbols. Conclusions, ranked by evidence strength:
+
+1. **Drop the 20-session holding cap** for trend entries; it exits winners early. Keeping EMA100 as the exit anchor instead: median return rose from +4.3% to +35.4% with drawdown still ~-26% (vs B&H drawdown ~-50/60%).
+2. **Regime anchor matters more than entry tweaks**: exiting only when close < EMA100 (or EMA200) captured multi-month trends (فملی +206%, فخوز +112%, شپنا +192%). Wider RSI entry bands (45-70) added ~+3pp median but raised DD; weak evidence, optional.
+3. **Never trade the slow variant (EMA20>50 + RSI band) without a regime exit** — full-history test (17y): median -86% from overtrading whipsaws with fee drag. Short-term EMA crossover entries are destructively active on TSE; if used at all, combine with EMA100/200 exit and expect ~8-10 trades/2y, not 190+.
+4. **None of the tested variants beat buy-and-hold on return** in this 2-year sample (rising market). Their value is drawdown control: strategy DD ~-26% vs B&H ~-50/64%. Present them as loss-limiting overlays, not alpha.
+5. **Multiple-comparisons discipline** (Bailey & López de Prado, DSR): we tested 11 variants across 2 windows; a best-of-11 winner is partly luck. Track the trial count with every experiment; do not claim an edge without out-of-sample confirmation, and prefer median across symbols over the single best case.
+
+Operational rule going forward: recommend the EMA100-exit overlay (entry unchanged: close>EMA20>EMA50, RSI 50-65; exit: close<EMA100 next-open) as the conservative default; keep the 20-session cap only when the user explicitly asks for short holding periods.
 
 ## Implemented scope and limitations
 - Executable modules (all tested, 70 synthetic unit tests):
@@ -74,10 +86,14 @@ Run the bundled `scripts/screener.py` with the available Python through `termina
 - 1 trillion rials = 0.1 trillion tomans = 0.1 همت. Codal often reports million rials: convert by 10,000,000 to همت (trillion tomans). Verify units each time.
 - Never reuse the earlier Mellat analysis as factual evidence: it mixed a subsidiary's financials, dates, units and raw/adjusted prices. Re-fetch before analyzing any symbol.
 
+## Backtest evidence (do not oversell)
+A real run of the technical proxy on 8 liquid symbols (latest ~1Y each, 103 closed trades) returned: strategy avg +3.2% vs buy-and-hold avg +170.9%; strategy beat buy-and-hold on 0/8 symbols; overall win rate 50.5%. Wins concentrated in already-trending names (فولاد 83% win rate) while churn-heavy names lost (وبصادر 19% win rate, -31.6%). When the user asks "would listening to the signals have made money": run `backtest_core.run_backtest` per symbol with `download(..., adjust=True)`, report strategy vs same-symbol buy-and-hold side by side, and state plainly that in rising markets this signal class underperforms severely — its value is loss-limiting (lower drawdowns), not profit generation. Never present the signal engine as a profit engine.
+
 ## Verification
 - Raw snapshots, unique universe/stage counts, shortlist/watchlist and per-stage exclusion symbols persisted as JSON/CSV. Reconcile cumulative stage counts with exclusions programmatically.
 - Empty/invalid inputs are `insufficient_data`, not a negative investment signal. Check integer share quantities/counts, count-volume consistency, balanced totals and available OHLC/turnover reconciliation. Reject explicitly non-rial, halted or non-equity metadata; missing metadata remains pending, never verified by default.
 - Date and currency validation completed; data gaps distinguished from no candidates.
 - Required gates individually evidenced for every buy; otherwise نامشخص/صبر کن.
 - Correct risk/reward formula tested; current script test suite passes.
+- This skill ships as a GitHub repo: https://github.com/hami-ashraafi/tehran-stock-analysis (branch `main`). After substantial module changes, commit and push from the skill directory so the repo matches the installed skill; pull before editing if another session may have pushed.
 - Skill installation success is not proof of a complete market analysis or investment profitability.

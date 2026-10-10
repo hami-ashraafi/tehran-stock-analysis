@@ -25,6 +25,9 @@ Top-quartile daily value, >=500 trades, positive EPS, buyer-power >=1.5, positiv
 - Bound legacy-library downloads in a subprocess because its requests may lack timeouts. Replace old result JSON with explicit failure status after unsuccessful collection.
 - First-stage tests and live collection do not test Codal parsing, corporate-action adjustment or final signals; those stages require their own implementations and validation before any end-to-end readiness claim.
 
+## Backtest findings (measured, not hypothetical)
+The fixed technical proxy (close > EMA20 > EMA50, RSI 50-65, next-open fill, 20-session max hold, explicit fees) was run on 8 liquid symbols over the latest ~1Y (103 closed trades): strategy avg +3.2% vs buy-and-hold avg +170.9%; beat buy-and-hold on 0/8 symbols; win rate 50.5%. Interpretation: late confirmation entries, cost drag from 103 round trips, and the short holding cap cut winners in a rising market. Per-symbol dispersion was wide (فولاد 83% win rate vs وبصادر 19%), so symbol churn matters as much as the signal. In down-markets the expected benefit is drawdown limitation, not alpha. Quote these numbers when asked whether signals would have been profitable; do not extrapolate them to a rising OR falling market without re-running on that period.
+
 ## Future validation before claiming improvement in returns
 Use point-in-time universes including delisted/failed symbols; as-published Codal statements; correct action-adjusted series; walk-forward out-of-sample splits; transaction fees, tax, slippage, holidays, trading halts, queues and realistic delayed fills. Compare to an appropriate market benchmark and report turnover, drawdown and sample size. No lookahead from pivot confirmation or daily closing data into same-day entries.
 
