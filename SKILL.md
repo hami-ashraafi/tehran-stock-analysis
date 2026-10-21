@@ -60,17 +60,7 @@ Single-day strict screening fails the real question: it surfaces limit-locked le
 4. **Composite score** (18-point): above EMA10 +2; chg_5d>2% +2, 0–2% +1; chg_20d>10% +2; vol_ratio≥1 +2; net_ind_5d>50M shares +3; bp_5d>1.5 +2; per-capita>10K +2; room_pct>1.5% +2; EPS>0 +1; **penalty −3 when chg_20d>80% (overextended/late-chase)**. Rank and report top names with all metrics, flagging near-ceiling names (room <1%) as queue-risk even when scores are high.
 5. Interpretation archetypes: strong momentum + rising volume + inflow + room = «در حال رفتن به سود»; positive 20d trend + today's pullback + high per-capita buy = dip-buy candidate (unconfirmed reversal — flag it); huge 20d gain (>80%) = late stage, distribution risk.
 
-The strict single-day screener stays the conservative default for the standard «فرصت خرید پیدا کن» contract; this funnel is for the explicit «قابل خرید، داره میره تو سود» short-term request.
-
-## Pre-breakout funnel (multi-stage screening, validated 2026-10-20)
-
-Single-day strict screening fails the real question: it surfaces limit-locked leaders (Close == Day_UL, 29/30 in one run) or one near-ceiling name — exactly what the user rejects («چیزی بخر که داره میره تو سود، نه رسیده به سقف»). When the user wants executable short-term entries, run this funnel AFTER (or instead of) stage 1:
-
-1. **Relaxed pre-screen** on the live market frame: `locked = Close == Day_UL`; require unlocked with `room_pct = (Day_UL-Close)/Close > 0.5%`, Value > 200B rial, EPS > 0, net individual volume (Vol_Buy_R - Vol_Sell_R) > 0, `Close(%) > -0.5`. Keep ~20 candidates; save to candidates.csv.
-2. **Multi-timeframe momentum** via `finpy_tse.Get_Price_History(start Jalali, end Jalali)` — Jalali dates REQUIRED (Gregorian silently returns an empty DataFrame). Compute per symbol: 5d/20d price change, close vs EMA10, vol_ratio (5d vol / 20d avg).
-3. **Flow** via `pytse_client.download_client_types_records(symbols=list, include_jdate=True)` — columns are ENGLISH (`individual_buy_vol`, `individual_sell_vol`, …), not Persian; a Persian-column matcher yields zero rows for every symbol (empty ≠ no flow). Compute net_ind 5d (M shares), buyer power 5d, per-capita buy volume.
-4. **Composite score** (18-point): above EMA10 +2; chg_5d>2% +2, 0–2% +1; chg_20d>10% +2; vol_ratio≥1 +2; net_ind_5d>50M shares +3; bp_5d>1.5 +2; per-capita>10K +2; room_pct>1.5% +2; EPS>0 +1; **penalty −3 when chg_20d>80% (overextended/late-chase)**. Rank and report top names with all metrics, flagging near-ceiling names (room <1%) as queue-risk even when scores are high.
-5. Interpretation archetypes: strong momentum + rising volume + inflow + room = «در حال رفتن به سود»; positive 20d trend + today's pullback + high per-capita buy = dip-buy candidate (unconfirmed reversal — flag it); huge 20d gain (>80%) = late stage, distribution risk.
+6. **Next-session validation (learned 2026-10-21, زشریف case):** the composite rank is a snapshot of yesterday's data — a #1 pick can open next session in a heavy sell queue (بدجوری سف فروش). Before acting on any funnel pick, re-verify TODAY's frame: fresh net individual flow, queue state (Close vs Day_UL/Day_LL), and yesterday-vs-today momentum flip. The funnel is only trustworthy if tracked: log each session's top picks and their next-session outcome (followed / faded / reversed) to build hit-rate evidence. A pick not validated against the next open is a hypothesis, not a signal.
 
 The strict single-day screener stays the conservative default for the standard «فرصت خرید پیدا کن» contract; this funnel is for the explicit «قابل خرید، داره میره تو سود» short-term request.
 
